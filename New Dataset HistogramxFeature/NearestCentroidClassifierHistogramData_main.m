@@ -1,20 +1,20 @@
 clear; clc;
 addpath('..\lib');
 
-experimentMode = 'NCC with histogram';
+experimentMode = 'NCC with histogram single model';
 folderRoot = ['Experiment result ' experimentMode];
 if ~exist(folderRoot, 'dir')
     mkdir(folderRoot);
 end
 
 %PARAMETER SETTING
-usersInvolved = [1:5 7:57 59:102];
+usersInvolved = [1:5 7:57];
 roundSize = 1;
 sampleSetDataPath = '..\DataSet\New';
 usedFeatureIndex = [1:49];
 classifierNumber = 1;
 numOfFlick = 5;
-periods = [3 4 5 6 7 8];
+periods = [3 4 5];
 
 postures = {'sit_long'};
 

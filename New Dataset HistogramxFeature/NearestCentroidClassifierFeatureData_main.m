@@ -8,14 +8,14 @@ if ~exist(folderRoot, 'dir')
 end
 
 %PARAMETER SETTING
-usersInvolved = [1:5];
+usersInvolved = [1:5 7:57 59:102];
 roundSize = 1;
 sampleSetDataPath = '..\DataSet\New';
 usedFeatureIndex = [1:49];
 classifierNumber = 1;
 numOfFlick = 5;
-periods = [3 4 5];
-
+periods = [3 4 5 6 7 8];
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
 postures = {'sit_long'};
 
 for postureString = postures
@@ -36,8 +36,6 @@ for postureString = postures
         load([sampleSetDataPath '\' posture '\round_' num2str(round) '_test_neg_sampleSet.mat']);
         negativeTrainingData = getFeatureData(trainNegHistogram);
         negativeTestingData = getFeatureData(testNegHistogram);
-        
-        [penaltyList, hiddenSizeNumber] = ClassifierSetParameter(1);
         display(['Round: ' num2str(round)]);
         
         for period = periods
@@ -50,40 +48,60 @@ for postureString = postures
             
             for userIndex = 1:numel(usersInvolved)
                 user = usersInvolved(userIndex);
+                load([sampleSetDataPath '\' posture '\' 'user_' num2str(user) '_period_' num2str(3) '_round_' num2str(round) '_train_sampleSet.mat']);
+                positiveTrainingDataOld = getFeatureData(trainHistogram); trainHistogram = [];
+                
                 load([sampleSetDataPath '\' posture '\' 'user_' num2str(user) '_period_' num2str(period) '_round_' num2str(round) '_train_sampleSet.mat']);
                 load([sampleSetDataPath '\' posture '\' 'user_' num2str(user) '_period_' num2str(period) '_round_' num2str(round) '_test_sampleSet.mat']);
-                
                 positiveTrainingData = getFeatureData(trainHistogram); trainHistogram = [];
                 positiveTestingData = getFeatureData(testHistogram); testHistogram = [];
+                
                 negativeForTrainingData = negativeTrainingData;
                 negativeForTrainingData(userIndex,:) = []; % Remove current user data from Negative Training Data
                 negativeForTestingData = negativeTestingData;
-                negativeForTestingData(userIndex,:) = [];
+                negativeForTestingData(userIndex,:) = []; % Remove current user data from Negative Testing Data
                 
-                positiveTrainingDataMixed    = MixData(positiveTrainingData);
-                positiveTestingDataMixed     = MixData(positiveTestingData);
-                negativeForTrainingDataMixed = MixData(negativeForTrainingData);
-                negativeForTestingDataMixed  = MixData(negativeForTestingData);
+                positiveTrainingDataOldMixed = [];
+                positiveTrainingDataMixed = [];
+                positiveTestingDataMixed = [];
                 
-                dataIndex = [size(positiveTrainingDataMixed,2);size(positiveTestingDataMixed,2);size(negativeForTrainingDataMixed,2);size(negativeForTestingDataMixed,2);];
-                tempData = [positiveTrainingDataMixed positiveTestingDataMixed negativeForTrainingDataMixed negativeForTestingDataMixed];
+                for i = 1:30
+                    positiveTrainingDataOldMixed = [positiveTrainingDataOldMixed; MixData(positiveTrainingDataOld(i,:))];
+                    positiveTrainingDataMixed    = [positiveTrainingDataMixed; MixData(positiveTrainingData(i,:))];
+                    positiveTestingDataMixed     = [positiveTestingDataMixed; MixData(positiveTestingData(i,:))];
+                end
+                
+                negativeForTrainingDataMixed = [];
+                negativeForTestingDataMixed  = [];            
+                for i = 1:99
+                    negativeForTrainingDataMixed = [negativeForTrainingDataMixed; MixData(negativeForTrainingData(i,:))];
+                    negativeForTestingDataMixed  = [negativeForTestingDataMixed; MixData(negativeForTestingData(i,:))];
+                end
+                
+                dataIndex = [size(positiveTrainingDataOldMixed,1);size(positiveTrainingDataMixed,1);size(positiveTestingDataMixed,1);size(negativeForTrainingDataMixed,1);size(negativeForTestingDataMixed,1);];
+                tempData = [positiveTrainingDataOldMixed; positiveTrainingDataMixed; positiveTestingDataMixed; negativeForTrainingDataMixed; negativeForTestingDataMixed];
                 normalizedData = normc(tempData);
                 
-                positiveTrainingDataIndex    = dataIndex(1);
-                positiveTestingDataIndex     = dataIndex(1) + dataIndex(2);
-                negativeForTrainingDataIndex = dataIndex(1) + dataIndex(2) + dataIndex(3);
-                negativeForTestingDataIndex  = dataIndex(1) + dataIndex(2) + dataIndex(3) + dataIndex(4);
+                positiveTrainingDataOldIndex = dataIndex(1);
+                positiveTrainingDataIndex    = dataIndex(1) + dataIndex(2);
+                positiveTestingDataIndex     = dataIndex(1) + dataIndex(2) + dataIndex(3);
+                negativeForTrainingDataIndex = dataIndex(1) + dataIndex(2) + dataIndex(3) + dataIndex(4);
+                negativeForTestingDataIndex  = dataIndex(1) + dataIndex(2) + dataIndex(3) + dataIndex(4) + dataIndex(5);
                 
-                positiveTrainingData    = normalizedData(:,1:positiveTrainingDataIndex);
-                positiveTestingData     = normalizedData(:,positiveTrainingDataIndex+1:positiveTestingDataIndex);
-                negativeForTrainingData = normalizedData(:,positiveTestingDataIndex+1:negativeForTrainingDataIndex);
-                negativeForTestingData  = normalizedData(:,negativeForTrainingDataIndex+1:negativeForTestingDataIndex);
+                positiveTrainingDataOld = normalizedData(1:positiveTrainingDataOldIndex,:);
+                positiveTrainingData    = normalizedData(positiveTrainingDataOldIndex+1:positiveTrainingDataIndex,:);
+                positiveTestingData     = normalizedData(positiveTrainingDataIndex+1:positiveTestingDataIndex,:);
+                negativeForTrainingData = normalizedData(positiveTestingDataIndex+1:negativeForTrainingDataIndex,:);
+                negativeForTestingData  = normalizedData(negativeForTrainingDataIndex+1:negativeForTestingDataIndex,:);
                 
-                fprintf('++ Training period: %d Start \n', period);
-                meanNegativeData = getMeanTrainingData(negativeForTrainingData, usedFeatureIndex);
+                if period == 3
+                    fprintf('++ Training period: %d Start \n', period);
+                    meanNegativeData{user} = getMeanTrainingData(negativeForTrainingData, usedFeatureIndex);
+                end
+                
                 meanPositiveData = getMeanTrainingData(positiveTrainingData, usedFeatureIndex);
                 fprintf('>> Testing period: %d Start \n', period);
-                [~,~,~,classResult,probability] = Nearest_Centroid_Classifier(usedFeatureIndex,positiveTestingData,negativeForTestingData,meanPositiveData,meanNegativeData);
+                [~,~,~,classResult,probability] = Nearest_Centroid_Classifier(usedFeatureIndex,positiveTestingData,negativeForTestingData,meanPositiveData,meanNegativeData{user});
                 
                 % Calculate FAR, FRR AND ACCURACY
                 testDataAnswer = [ones(size(positiveTestingData,1),1); zeros(size(negativeForTestingData,1),1)];
