@@ -70,7 +70,7 @@ for postureString = postures
                 end
                 
                 meanPositiveData = getMeanTrainingData(positiveTrainingData, usedFeatureIndex);
-                fprintf('>> Testing period: %d User: %d Start \n', period, usersInvolved(userIndex));
+                fprintf('>> Testing period: %d User: %d Start \n', period, userInv);
                 [~,~,~,classResult,probability] = Nearest_Centroid_Classifier(usedFeatureIndex,positiveTestingData,negativeForTestingData,meanPositiveData,meanNegativeData{userIndex});
                 
                 % Calculate FAR, FRR AND ACCURACY
