@@ -21,12 +21,12 @@ for dataCount = 1:size(testData, 1)
     if ExperimentParameters().isHistogramDataUsed
         expHTest = MixData(testData(dataCount,:));
     else
-        expHTest =testData;
+        expHTest = testData(dataCount,:);
     end
     
     %% euclidian distance
-    distanceTestWNew = calculateAvgEuDistanceDataAndMean(testData(dataCount,:), meanData_new);
-    distanceWithNeg = calculateAvgEuDistanceDataAndMean(testData(dataCount,:),meanNeg);
+    distanceTestWNew = calculateAvgEuDistanceDataAndMean(expHTest, meanData_new);
+    distanceWithNeg = calculateAvgEuDistanceDataAndMean(expHTest,meanNeg);
     
     if (distanceTestWNew<=distanceWithNeg)
         classresult = [classresult; 1];

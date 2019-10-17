@@ -1,7 +1,7 @@
 clear; clc;
 addpath('..\lib');
 
-experimentMode = 'NCC with feature new';
+experimentMode = 'NCC with feature new me';
 folderRoot = ['Experiment result ' experimentMode];
 if ~exist(folderRoot, 'dir')
     mkdir(folderRoot);
@@ -34,8 +34,8 @@ for postureString = postures
         % Load Negative Data for Training & Testing
         load([sampleSetDataPath '\' posture '\round_' num2str(round) '_train_neg_sampleSet.mat']);
         load([sampleSetDataPath '\' posture '\round_' num2str(round) '_test_neg_sampleSet.mat']);
-        negativeTrainingData = getFeatureData(trainNegHistogram);
-        negativeTestingData = getFeatureData(testNegHistogram);
+        negativeTrainingData = getFeatureDataV2(trainNegHistogram);
+        negativeTestingData = getFeatureDataV2(testNegHistogram);
         display(['Round: ' num2str(round)]);
         
         for period = periods
@@ -48,51 +48,30 @@ for postureString = postures
             
             for userIndex = 1:numel(usersInvolved)
                 user = usersInvolved(userIndex);
-                load([sampleSetDataPath '\' posture '\' 'user_' num2str(user) '_period_' num2str(3) '_round_' num2str(round) '_train_sampleSet.mat']);
-                positiveTrainingDataOld = getFeatureData(trainHistogram); trainHistogram = [];
                 
                 load([sampleSetDataPath '\' posture '\' 'user_' num2str(user) '_period_' num2str(period) '_round_' num2str(round) '_train_sampleSet.mat']);
                 load([sampleSetDataPath '\' posture '\' 'user_' num2str(user) '_period_' num2str(period) '_round_' num2str(round) '_test_sampleSet.mat']);
-                positiveTrainingData = getFeatureData(trainHistogram); trainHistogram = [];
-                positiveTestingData = getFeatureData(testHistogram); testHistogram = [];
+                positiveTrainingData = getFeatureDataV2(trainHistogram); trainHistogram = [];
+                positiveTestingData = getFeatureDataV2(testHistogram); testHistogram = [];
                 
                 negativeForTrainingData = negativeTrainingData;
                 negativeForTrainingData(userIndex,:) = []; % Remove current user data from Negative Training Data
                 negativeForTestingData = negativeTestingData;
                 negativeForTestingData(userIndex,:) = []; % Remove current user data from Negative Testing Data
                 
-                positiveTrainingDataOldMixed = [];
-                positiveTrainingDataMixed = [];
-                positiveTestingDataMixed = [];
-                
-                for i = 1:30
-                    positiveTrainingDataOldMixed = [positiveTrainingDataOldMixed; MixData(positiveTrainingDataOld(i,:))];
-                    positiveTrainingDataMixed    = [positiveTrainingDataMixed; MixData(positiveTrainingData(i,:))];
-                    positiveTestingDataMixed     = [positiveTestingDataMixed; MixData(positiveTestingData(i,:))];
-                end
-                
-                negativeForTrainingDataMixed = [];
-                negativeForTestingDataMixed  = [];            
-                for i = 1:99
-                    negativeForTrainingDataMixed = [negativeForTrainingDataMixed; MixData(negativeForTrainingData(i,:))];
-                    negativeForTestingDataMixed  = [negativeForTestingDataMixed; MixData(negativeForTestingData(i,:))];
-                end
-                
-                dataIndex = [size(positiveTrainingDataOldMixed,1);size(positiveTrainingDataMixed,1);size(positiveTestingDataMixed,1);size(negativeForTrainingDataMixed,1);size(negativeForTestingDataMixed,1);];
-                tempData = [positiveTrainingDataOldMixed; positiveTrainingDataMixed; positiveTestingDataMixed; negativeForTrainingDataMixed; negativeForTestingDataMixed];
+                dataIndex = [size(positiveTrainingData,1);size(positiveTestingData,1);size(negativeForTrainingData,1);size(negativeForTestingData,1);];
+                tempData = [positiveTrainingData; positiveTestingData; negativeForTrainingData; negativeForTestingData];
                 normalizedData = normc(tempData);
                 
-                positiveTrainingDataOldIndex = dataIndex(1);
-                positiveTrainingDataIndex    = dataIndex(1) + dataIndex(2);
-                positiveTestingDataIndex     = dataIndex(1) + dataIndex(2) + dataIndex(3);
-                negativeForTrainingDataIndex = dataIndex(1) + dataIndex(2) + dataIndex(3) + dataIndex(4);
-                negativeForTestingDataIndex  = dataIndex(1) + dataIndex(2) + dataIndex(3) + dataIndex(4) + dataIndex(5);
+                positiveTrainingDataIndex       = dataIndex(1);
+                positiveTestingDataIndex        = dataIndex(1) + dataIndex(2);
+                negativeForTrainingDataIndex    = dataIndex(1) + dataIndex(2) + dataIndex(3);
+                negativeForTestingDataIndex     = dataIndex(1) + dataIndex(2) + dataIndex(3) + dataIndex(4);
                 
-                positiveTrainingDataOld = normalizedData(1:positiveTrainingDataOldIndex,:);
-                positiveTrainingData    = normalizedData(positiveTrainingDataOldIndex+1:positiveTrainingDataIndex,:);
-                positiveTestingData     = normalizedData(positiveTrainingDataIndex+1:positiveTestingDataIndex,:);
-                negativeForTrainingData = normalizedData(positiveTestingDataIndex+1:negativeForTrainingDataIndex,:);
-                negativeForTestingData  = normalizedData(negativeForTrainingDataIndex+1:negativeForTestingDataIndex,:);
+                positiveTrainingData        = normalizedData(1:positiveTrainingDataIndex,:);
+                positiveTestingData         = normalizedData(positiveTrainingDataIndex+1:positiveTestingDataIndex,:);
+                negativeForTrainingData     = normalizedData(positiveTestingDataIndex+1:negativeForTrainingDataIndex,:);
+                negativeForTestingData      = normalizedData(negativeForTrainingDataIndex+1:negativeForTestingDataIndex,:);
                 
                 if period == 3
                     fprintf('++ Training period: %d Start \n', period);

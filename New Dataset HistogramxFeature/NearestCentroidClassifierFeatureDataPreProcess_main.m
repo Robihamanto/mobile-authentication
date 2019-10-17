@@ -1,7 +1,7 @@
 clear; clc;
 addpath('..\lib');
 
-experimentMode = 'NCC with feature new';
+experimentMode = 'NCC with feature';
 folderRoot = ['Experiment result ' experimentMode];
 if ~exist(folderRoot, 'dir')
     mkdir(folderRoot);
