@@ -125,6 +125,8 @@ for postureString = postures
     winopen(fileNameForAllAverageEER);
 end
 
+disp('Experiment Completed');
+
 
 
 
