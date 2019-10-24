@@ -10,7 +10,6 @@ numOfFlick = 5;
 sampleset_path = '..\..\..\DataSet\New';
 sampleset_path_Neg = '..\..\..\DataSet\New';
 roundSize = 1;
-% userInvolved = [1:4 7:12 14:30 35 36 39:57 59:70];
 userInvolved = [1:5 7:57 59:102];
 FeatureIndex = 1:49;
 periodList = [3 4 5 6 7 8];
