@@ -8,6 +8,7 @@ if ~exist(folderRoot, 'dir')
 end
 
 %PARAMETER SETTING
+%usersInvolved = [1:5 7:57 59:102];
 usersInvolved = [1:5 7:57 59:102];
 roundSize = 1;
 sampleSetDataPath = '..\DataSet\New';
@@ -124,7 +125,6 @@ for postureString = postures
     winopen(fileNameForAllAverageEER);
 end
 
-disp('Experiment completed.')
 
 
 
